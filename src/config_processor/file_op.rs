@@ -6,11 +6,11 @@ pub fn read_file(file_path: &str) -> Result<String, Box<dyn error::Error>> {
     Ok(contents)
 }
 
-pub async fn copy_config_file(source_path: &str, destination_path: &str) -> io::Result<()> {
+pub async fn copy_config_file<P: AsRef<str>>(source_path: P, destination_path: P) -> io::Result<()> {
 
-    let source = Path::new(source_path);
+    let source = Path::new(source_path.as_ref());
     let file_name = source.file_name().ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "Invalid Input"))?;
-    let dest = Path::new(destination_path).join(file_name);
+    let dest = Path::new(destination_path.as_ref()).join(file_name);
     fs::copy(&source,&dest)?;
     Ok(())
 }

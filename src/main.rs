@@ -12,7 +12,12 @@ async fn main() {
         args.push(arg);
     }
 
-    let copy_file_task = task::spawn(file_op::copy_config_file(&args[0], "improxyble/static/"));
+    if args.is_empty() {
+        println!("the args are zero");
+        return;
+    }
+
+    let copy_file_task = task::spawn(file_op::copy_config_file(args[0].clone(), "static".to_string()));
 
     match file_op::read_file(&args[0]) {
         
@@ -26,5 +31,9 @@ async fn main() {
         Err(err) => println!("Failed to read file: {}", err),
     }
 
-    let copy_file_result = copy_file_task.await;
+    match copy_file_task.await {
+        Ok(Ok(())) => println!("The contents copied successfully."),
+        Ok(Err(e)) => println!("Error copying file: {}", e),
+        Err(e) => println!("Task panicked: {:?}", e), // Handles cases where the task itself failed
+    }
 }

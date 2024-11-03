@@ -1,0 +1,6 @@
+title: My Application
+version: 1
+settings:
+  enabled: true
+  threshold: 0.85
+
