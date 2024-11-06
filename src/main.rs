@@ -2,6 +2,9 @@ use std::env;
 use tokio::task;
 mod config_processor;
 use config_processor::{file_op,config_model};
+mod master;
+use master::master_process;
+mod  worker;
 
 #[tokio::main]
 async fn main() {
@@ -18,22 +21,43 @@ async fn main() {
     }
 
     let copy_file_task = task::spawn(file_op::copy_config_file(args[0].clone(), "static".to_string()));
-
-    match file_op::read_file(&args[0]) {
+    let config = match file_op::read_file(&args[0]) {
         
         Ok(contents) => {
             match  config_model::Config::new(&contents){
                 
-                Ok(config) => println!("Config loaded: {:?}", config),
-                Err(err) => println!("Failed to parse config: {}", err),
+                Ok(config) => {
+                    println!("Config loaded: {:?}", config);
+                    config
+                },
+                Err(err) => {
+                    println!("Failed to parse config: {}", err);
+                    return;
+                },
             }
         },
-        Err(err) => println!("Failed to read file: {}", err),
-    }
+        Err(err) => {
+            println!("Failed to read file: {}", err);
+            return;
+        },
+    };
+
+    let brain = match master_process::Brain::new(&config) {
+        Ok(brain) => {
+            println!("master process created ");
+            brain
+        },
+        Err(err) => {
+            println!("failed to create master process {}", err);
+            return;
+        }
+    };
 
     match copy_file_task.await {
         Ok(Ok(())) => println!("The contents copied successfully."),
         Ok(Err(e)) => println!("Error copying file: {}", e),
         Err(e) => println!("Task panicked: {:?}", e), // Handles cases where the task itself failed
     }
+
+    
 }
