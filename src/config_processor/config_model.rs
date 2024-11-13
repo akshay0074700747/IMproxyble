@@ -15,4 +15,20 @@ impl Config {
         let config: Config = serde_yaml::from_str(contents)?;
         Ok(config)
     }
+
+    pub fn get_title(&self) -> &String {
+        &self.title
+    }
+
+    pub fn get_version(&self) -> u32 {
+        self.version
+    }
+
+    pub fn get_settings(&self) -> &HashMap<String,serde_yaml::Value> {
+        &self.settings
+    }
+
+    pub fn get_setting(&self, key: &String) -> Option<&serde_yaml::Value> {
+        self.settings.get(key)
+    }
 }

@@ -5,6 +5,8 @@ use config_processor::{file_op,config_model};
 mod master;
 use master::master_process;
 mod  worker;
+mod enums;
+mod custom_macros;
 
 #[tokio::main]
 async fn main() {
